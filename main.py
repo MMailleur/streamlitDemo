@@ -96,9 +96,10 @@ if selected_tab == 'Player :athletic_shoe:':
 
     # Add content to other columns if needed
     with col2:
-        st.info(f"Age: {df_row["Age"].iloc[0]} years")
-        st.info(f"Height: {df_row["Height"].iloc[0]} cm")
-        st.info(f"Footedness: {df_row["foot"].iloc[0]}")
+        st.info(f"Age: {df_row['Age'].iloc[0]} years")
+        st.info(f"Height: {df_row['Height'].iloc[0]} cm")
+        st.info(f"Footedness: {df_row['foot'].iloc[0]}")
+
     # Display the Plotly chart in Streamlit app
 
 
