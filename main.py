@@ -17,17 +17,7 @@ st.set_page_config(
 # Sidebar with tabs
 selected_tab = st.sidebar.radio("Football Market analysis", ["Market Stats :chart:", "Player :athletic_shoe:"])
 
-# Dropdown to select a country
-selected_country = st.sidebar.selectbox("Select a Country", df["PAYS"].dropna().unique())
 
-# Filter player names based on the selected country
-filtered_players = df[df["PAYS"] == selected_country]["name"].unique()
-
-# Dropdown to select a player from the filtered list
-selected_player = st.sidebar.selectbox("Select a Player", filtered_players)
-
-# Filter the DataFrame based on the selected player
-df_row = df[df["name"] == selected_player]
 
 # Main content based on selected tab
 if selected_tab == "Market Stats :chart:":
@@ -47,6 +37,17 @@ if selected_tab == 'Player :athletic_shoe:':
         """,
         unsafe_allow_html=True
     )
+    # Dropdown to select a country
+    selected_country = st.sidebar.selectbox("Select a Country", df["PAYS"].dropna().unique())
+    
+    # Filter player names based on the selected country
+    filtered_players = df[df["PAYS"] == selected_country]["name"].unique()
+    
+    # Dropdown to select a player from the filtered list
+    selected_player = st.sidebar.selectbox("Select a Player", filtered_players)
+    
+    # Filter the DataFrame based on the selected player
+    df_row = df[df["name"] == selected_player]
 
     player_attributes = calculate_player_attributes(df_row)
 
