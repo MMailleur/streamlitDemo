@@ -80,7 +80,7 @@ def generate_player_stats_comparison_graph(top_5_stats_player, mean_df):
     fig_stats_comparison.update_layout(
         # Set barmode to 'group' for side-by-side bars
         margin=dict(t=50, r=50, b=50, l=50),  # Set all margins to zero
-        width=700,
+        width=600,
         height=400
     )
 
