@@ -3,10 +3,11 @@ import plotly.express as px
 import pandas as pd
 import plotly.graph_objects as go
 from utils import load_data, calculate_player_attributes, calculate_mean_attributes, generate_player_stats_comparison, generate_player_stats_comparison_graph, generate_player_attributes_comparison_graph
-
+import joblib
+from sklearn.ensemble import RandomForestRegressor
 # Load data
 df = load_data("datasetMerged.csv")
-
+best_model = joblib.load('best_model.pkl')
 # Set Streamlit page configuration
 st.set_page_config(
     page_title="Player Market Price",
@@ -15,7 +16,7 @@ st.set_page_config(
 )
 
 # Sidebar with tabs
-selected_tab = st.sidebar.radio("Football Market analysis", ["Market Stats :chart:", "Player :athletic_shoe:"])
+selected_tab = st.sidebar.radio("Football Market analysis", ["Market Stats :chart:", "Player :athletic_shoe:","Player Market Value IA prediction 🤯"])
 
 
 
@@ -39,13 +40,13 @@ if selected_tab == 'Player :athletic_shoe:':
     )
     # Dropdown to select a country
     selected_country = st.sidebar.selectbox("Select a Country", df["PAYS"].dropna().unique())
-    
+
     # Filter player names based on the selected country
     filtered_players = df[df["PAYS"] == selected_country]["name"].unique()
-    
+
     # Dropdown to select a player from the filtered list
     selected_player = st.sidebar.selectbox("Select a Player", filtered_players)
-    
+
     # Filter the DataFrame based on the selected player
     df_row = df[df["name"] == selected_player]
 
@@ -109,3 +110,38 @@ if selected_tab == 'Player :athletic_shoe:':
 
         reputation = str(df_row["Best position"].iloc[0])
         st.metric("Best position", reputation)
+if selected_tab == 'Player Market Value IA prediction 🤯':
+    st.title('Market Value Predictor')
+
+    # Define input features using sliders
+    ball_control = st.slider('Ball Control', min_value=0, max_value=100, value=50)
+    dribbling_reflexes = st.slider('Dribbling / Reflexes', min_value=0, max_value=100, value=50)
+    total_power = st.slider('Total Power', min_value=0, max_value=500, value=250)
+    shooting_handling = st.slider('Shooting / Handling', min_value=0, max_value=100, value=50)
+    age = st.slider('Age', min_value=15, max_value=40, value=25)
+    total_mentality = st.slider('Total Mentality', min_value=0, max_value=500, value=250)
+    finishing = st.slider('Finishing', min_value=0, max_value=100, value=50)
+    passing_kicking = st.slider('Passing / Kicking', min_value=0, max_value=100, value=50)
+    shot_power = st.slider('Shot Power', min_value=0, max_value=100, value=50)
+    international_reputation = st.slider('International Reputation', min_value=1, max_value=5, value=3)
+
+    # Convert input features to DataFrame
+    input_features = {
+        'Ball control': ball_control,
+        'Dribbling / Reflexes': dribbling_reflexes,
+        'Total power': total_power,
+        'Shooting / Handling': shooting_handling,
+        'Age': age,
+        'Total mentality': total_mentality,
+        'Finishing': finishing,
+        'Passing / Kicking': passing_kicking,
+        'Shot power': shot_power,
+        'International reputation': international_reputation
+    }
+    input_data = pd.DataFrame([input_features])
+
+    # Make predictions
+    predictions = best_model.predict(input_data)
+
+    # Display predictions
+    st.write(f"Predicted market value is {predictions[0]}")
