@@ -125,7 +125,7 @@ if selected_tab == 'Player Market Value IA prediction 🤯':
     shot_power = st.slider('Shot Power', min_value=0, max_value=100, value=50)
     international_reputation = st.slider('International Reputation', min_value=1, max_value=5, value=3)
 
-    Convert input features to DataFrame
+    
     input_features = {
         'Ball control': ball_control,
         'Dribbling / Reflexes': dribbling_reflexes,
