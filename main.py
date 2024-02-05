@@ -153,7 +153,8 @@ if selected_tab == 'Player Market Value IA prediction 🤯':
     input_data = pd.DataFrame([input_features])
 
     # Make predictions
-    predictions = best_model.predict(input_data)
+    input_array = input_data.values
+    predictions = best_model.predict(input_array)
 
     # Display predictions
     st.write(f"Predicted market value is {predictions[0]}")
