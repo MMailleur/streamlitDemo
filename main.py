@@ -125,31 +125,20 @@ if selected_tab == 'Player Market Value IA prediction 🤯':
     shot_power = st.slider('Shot Power', min_value=0, max_value=100, value=50)
     international_reputation = st.slider('International Reputation', min_value=1, max_value=5, value=3)
 
-    # Convert input features to DataFrame
-    # input_features = {
-    #     'Ball control': ball_control,
-    #     'Dribbling / Reflexes': dribbling_reflexes,
-    #     'Total power': total_power,
-    #     'Shooting / Handling': shooting_handling,
-    #     'Age': age,
-    #     'Total mentality': total_mentality,
-    #     'Finishing': finishing,
-    #     'Passing / Kicking': passing_kicking,
-    #     'Shot power': shot_power,
-    #     'International reputation': international_reputation
-    # }
-    input_features = [
-    {'Ball control': 77, 
-     'Dribbling / Reflexes': 79, 
-     'Total power': 317,
-    'Shooting / Handling': 78, 
-     'Age': 26, 
-     'Total mentality': 354,
-    'Finishing': 74, 
-     'Passing / Kicking': 77, 
-     'Shot power': 84, 
-     'International reputation': 2}
-    ]
+    Convert input features to DataFrame
+    input_features = {
+        'Ball control': ball_control,
+        'Dribbling / Reflexes': dribbling_reflexes,
+        'Total power': total_power,
+        'Shooting / Handling': shooting_handling,
+        'Age': age,
+        'Total mentality': total_mentality,
+        'Finishing': finishing,
+        'Passing / Kicking': passing_kicking,
+        'Shot power': shot_power,
+        'International reputation': international_reputation
+    }
+ 
     input_data = pd.DataFrame([input_features])
 
     # Make predictions
