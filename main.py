@@ -3,22 +3,23 @@ import plotly.express as px
 import pandas as pd
 import plotly.graph_objects as go
 import numpy as np
-from utils import calculate_player_attributes, calculate_mean_attributes,format_market_value, generate_player_stats_comparison, generate_player_stats_comparison_graph, generate_player_attributes_comparison_graph
+from utils import load_data, calculate_player_attributes, calculate_mean_attributes,format_market_value\
+, generate_player_stats_comparison, generate_player_stats_comparison_graph, generate_player_attributes_comparison_graph
 import joblib
 from sklearn.ensemble import RandomForestRegressor
 # Load data
-
+st.set_page_config(
+    page_title="Player Market Price",
+    page_icon=":soccer:",  # Change to your preferred icon
+    layout="wide"
+)
 @st.cache_data
 def load_data(file_path):
     return pd.read_csv(file_path)
 df = load_data("datasetMerged.csv")
 best_model = joblib.load('best_model.pkl')
 # Set Streamlit page configuration
-st.set_page_config(
-    page_title="Player Market Price",
-    page_icon=":soccer:",  # Change to your preferred icon
-    layout="wide"
-)
+
 
 # Sidebar with tabs
 selected_tab = st.sidebar.radio("Football Market analysis", ["Market Stats :chart:", "Player :athletic_shoe:","Player Market Value IA prediction 🤯"])
@@ -27,13 +28,20 @@ selected_tab = st.sidebar.radio("Football Market analysis", ["Market Stats :char
 
 # Main content based on selected tab
 if selected_tab == "Market Stats :chart:":
+    cola,colb = st.columns(2)
     # Create the scatter plot with player names as tooltips
-    fig = px.scatter(df, x='Age', y='Value', hover_data=['name'],
-                     title='Age vs Market Value with Player Names')
+    with cola :
+        fig = px.scatter(df, x='Age', y='Value', hover_data=['name'],
+                        title='Age vs Market Value with Player Names')
+        st.plotly_chart(fig)
+    with colb :
+        foot_counts = df['foot'].value_counts()
+        fig_pie = px.pie(names=foot_counts.index, values=foot_counts.values, title='Distribution of Strong foots')
+        st.plotly_chart(fig_pie)
 
-    # Display the plot in Streamlit app
-    st.plotly_chart(fig)
-
+    df_show = df[df.columns[df.columns != "Unnamed: 0"]]
+    st.subheader("Dataset Fifa value and player stats")
+    st.dataframe(df_show)
 if selected_tab == 'Player :athletic_shoe:':
     st.markdown(
         """
