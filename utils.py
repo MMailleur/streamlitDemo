@@ -2,8 +2,9 @@
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+import streamlit as st
 
-
+@st.cache_data
 def load_data(file_path):
     return pd.read_csv(file_path)
 
@@ -115,3 +116,11 @@ def generate_player_attributes_comparison_graph(player_attributes, mean_attribut
     )
 
     return fig_attributes
+
+def format_market_value(value):
+    if value >= 1e6:  # If the value is greater than or equal to 1 million
+        return f"{value / 1e6:.1f}M€"
+    elif value >= 1e3:  # If the value is greater than or equal to 1 thousand
+        return f"{value / 1e3:.0f}k€"
+    else:  # For values less than 1 thousand
+        return f"{value:.0f}€"

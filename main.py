@@ -2,10 +2,13 @@ import streamlit as st
 import plotly.express as px
 import pandas as pd
 import plotly.graph_objects as go
-from utils import load_data, calculate_player_attributes, calculate_mean_attributes, generate_player_stats_comparison, generate_player_stats_comparison_graph, generate_player_attributes_comparison_graph
+import numpy as np
+from utils import load_data, calculate_player_attributes, calculate_mean_attributes,format_market_value\
+, generate_player_stats_comparison, generate_player_stats_comparison_graph, generate_player_attributes_comparison_graph
 import joblib
 from sklearn.ensemble import RandomForestRegressor
 # Load data
+
 df = load_data("datasetMerged.csv")
 best_model = joblib.load('best_model.pkl')
 # Set Streamlit page configuration
@@ -113,19 +116,37 @@ if selected_tab == 'Player :athletic_shoe:':
 if selected_tab == 'Player Market Value IA prediction 🤯':
     st.title('Market Value Predictor')
 
-    # Define input features using sliders
-    ball_control = st.slider('Ball Control', min_value=0, max_value=100, value=50)
-    dribbling_reflexes = st.slider('Dribbling / Reflexes', min_value=0, max_value=100, value=50)
-    total_power = st.slider('Total Power', min_value=0, max_value=500, value=250)
-    shooting_handling = st.slider('Shooting / Handling', min_value=0, max_value=100, value=50)
-    age = st.slider('Age', min_value=15, max_value=40, value=25)
-    total_mentality = st.slider('Total Mentality', min_value=0, max_value=500, value=250)
-    finishing = st.slider('Finishing', min_value=0, max_value=100, value=50)
-    passing_kicking = st.slider('Passing / Kicking', min_value=0, max_value=100, value=50)
-    shot_power = st.slider('Shot Power', min_value=0, max_value=100, value=50)
-    international_reputation = st.slider('International Reputation', min_value=1, max_value=5, value=3)
+    ball_control, dribbling_reflexes = st.columns(2)
+    total_power, shooting_handling = st.columns(2)
+    age, total_mentality = st.columns(2)
+    finishing, passing_kicking = st.columns(2)
+    shot_power, international_reputation = st.columns(2)
 
-    
+    with ball_control:
+        ball_control = st.slider('Ball Control', min_value=0, max_value=100, value=50)
+    with dribbling_reflexes:
+        dribbling_reflexes = st.slider('Dribbling / Reflexes', min_value=0, max_value=100, value=50)
+
+    with total_power:
+        total_power = st.slider('Total Power', min_value=0, max_value=500, value=250)
+    with shooting_handling:
+        shooting_handling = st.slider('Shooting / Handling', min_value=0, max_value=100, value=50)
+
+    with age:
+        age = st.slider('Age', min_value=15, max_value=40, value=25)
+    with total_mentality:
+        total_mentality = st.slider('Total Mentality', min_value=0, max_value=500, value=250)
+
+    with finishing:
+        finishing = st.slider('Finishing', min_value=0, max_value=100, value=50)
+    with passing_kicking:
+        passing_kicking = st.slider('Passing / Kicking', min_value=0, max_value=100, value=50)
+
+    with shot_power:
+        shot_power = st.slider('Shot Power', min_value=0, max_value=100, value=50)
+    with international_reputation:
+        international_reputation = st.slider('International Reputation', min_value=1, max_value=5, value=3)
+
     input_features = {
         'Ball control': ball_control,
         'Dribbling / Reflexes': dribbling_reflexes,
@@ -144,6 +165,8 @@ if selected_tab == 'Player Market Value IA prediction 🤯':
     # Make predictions
     input_array = input_data.values
     predictions = best_model.predict(input_array)
+    predicted_value = np.exp(predictions[0])
+    formatted_value = format_market_value(predicted_value)
 
-    # Display predictions
-    st.write(f"Predicted market value is {predictions[0]}")
+    # Display the formatted predicted market value
+    st.write(f"Predicted market value is {formatted_value}")
