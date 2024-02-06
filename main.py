@@ -3,7 +3,7 @@ import plotly.express as px
 import pandas as pd
 import plotly.graph_objects as go
 import numpy as np
-from utils import load_data, calculate_player_attributes, calculate_mean_attributes,format_market_value, generate_player_stats_comparison, generate_player_stats_comparison_graph, generate_player_attributes_comparison_graph
+from utils import calculate_player_attributes, calculate_mean_attributes,format_market_value, generate_player_stats_comparison, generate_player_stats_comparison_graph, generate_player_attributes_comparison_graph
 import joblib
 from sklearn.ensemble import RandomForestRegressor
 # Load data
