@@ -2,11 +2,7 @@
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-import streamlit as st
 
-@st.cache_data
-def load_data(file_path):
-    return pd.read_csv(file_path)
 
 def calculate_player_attributes(df_row):
     player_attributes = {
