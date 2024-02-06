@@ -9,6 +9,9 @@ import joblib
 from sklearn.ensemble import RandomForestRegressor
 # Load data
 
+@st.cache_data
+def load_data(file_path):
+    return pd.read_csv(file_path)
 df = load_data("datasetMerged.csv")
 best_model = joblib.load('best_model.pkl')
 # Set Streamlit page configuration
