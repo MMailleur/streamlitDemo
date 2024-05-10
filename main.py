@@ -3,20 +3,32 @@ import plotly.express as px
 import pandas as pd
 import plotly.graph_objects as go
 import numpy as np
+from sqlalchemy import create_engine
 from utils import load_data, calculate_player_attributes, calculate_mean_attributes,format_market_value\
 , generate_player_stats_comparison, generate_player_stats_comparison_graph, generate_player_attributes_comparison_graph
 import joblib
 from sklearn.ensemble import RandomForestRegressor
+import math
 # Load data
 st.set_page_config(
     page_title="Player Market Price",
     page_icon=":soccer:",  # Change to your preferred icon
     layout="wide"
 )
-@st.cache_data
-def load_data(file_path):
-    return pd.read_csv(file_path)
-df = load_data("datasetMerged.csv")
+def load_data_from_base(table,engine):
+    return pd.read_sql(f"SELECT * FROM {table}", engine)
+engine = create_engine(
+    "mysql+mysqlconnector://{user}:{pw}@{host}:{port}/{db}".format(
+        user=st.secrets["user"],
+        pw=st.secrets["password"],
+        host=st.secrets["host"],
+        port=st.secrets["port"],
+        db=st.secrets["database"],
+    )
+)
+df_player_web_stats = load_data_from_base("player_web_stats",engine)
+df_ref_joueurs = load_data_from_base("ref_joueurs",engine)
+df = df_player_web_stats.merge(df_ref_joueurs, left_on='name', right_on='Surnom')
 best_model = joblib.load('best_model.pkl')
 # Set Streamlit page configuration
 
@@ -124,59 +136,35 @@ if selected_tab == 'Player :athletic_shoe:':
         reputation = str(df_row["Best position"].iloc[0])
         st.metric("Best position", reputation)
 if selected_tab == 'Player Market Value IA prediction 🤯':
-    st.title('Market Value Predictor')
+    st.title('🔮 Market Value Predictor')
 
-    ball_control, dribbling_reflexes = st.columns(2)
-    total_power, shooting_handling = st.columns(2)
-    age, total_mentality = st.columns(2)
-    finishing, passing_kicking = st.columns(2)
-    shot_power, international_reputation = st.columns(2)
+    st.markdown("""
+                Welcome to the Market Value Predictor! Here, you can upload your player data as a CSV file and
+                get the predicted market value. The result is stored and can be viewed in the table below.
+                Let's get started! 👇
+                """)
 
-    with ball_control:
-        ball_control = st.slider('Ball Control', min_value=0, max_value=100, value=50)
-    with dribbling_reflexes:
-        dribbling_reflexes = st.slider('Dribbling / Reflexes', min_value=0, max_value=100, value=50)
+    # Upload a CSV file
+    uploaded_file = st.file_uploader("Please upload a CSV file", type=["csv"])
 
-    with total_power:
-        total_power = st.slider('Total Power', min_value=0, max_value=500, value=250)
-    with shooting_handling:
-        shooting_handling = st.slider('Shooting / Handling', min_value=0, max_value=100, value=50)
+    if uploaded_file is not None:
+        # Read the uploaded CSV file into a pandas DataFrame
+        player_sample_df = pd.read_csv(uploaded_file, sep=";")
+        predictions = best_model.predict(player_sample_df)
+        actual_value = math.exp(predictions)
 
-    with age:
-        age = st.slider('Age', min_value=15, max_value=40, value=25)
-    with total_mentality:
-        total_mentality = st.slider('Total Mentality', min_value=0, max_value=500, value=250)
-
-    with finishing:
-        finishing = st.slider('Finishing', min_value=0, max_value=100, value=50)
-    with passing_kicking:
-        passing_kicking = st.slider('Passing / Kicking', min_value=0, max_value=100, value=50)
-
-    with shot_power:
-        shot_power = st.slider('Shot Power', min_value=0, max_value=100, value=50)
-    with international_reputation:
-        international_reputation = st.slider('International Reputation', min_value=1, max_value=5, value=3)
-
-    input_features = {
-        'Ball control': ball_control,
-        'Dribbling / Reflexes': dribbling_reflexes,
-        'Total power': total_power,
-        'Shooting / Handling': shooting_handling,
-        'Age': age,
-        'Total mentality': total_mentality,
-        'Finishing': finishing,
-        'Passing / Kicking': passing_kicking,
-        'Shot power': shot_power,
-        'International reputation': international_reputation
-    }
- 
-    input_data = pd.DataFrame([input_features])
-
-    # Make predictions
-    input_array = input_data.values
-    predictions = best_model.predict(input_array)
-    predicted_value = np.exp(predictions[0])
-    formatted_value = format_market_value(predicted_value)
-
-    # Display the formatted predicted market value
-    st.write(f"Predicted market value is {formatted_value}")
+        # Format the actual value with appropriate units
+        if actual_value < 1000:
+            formatted_value = f"{actual_value:.2f}"
+        elif actual_value < 1_000_000:
+            formatted_value = f"{actual_value / 1000:.2f}K"
+        else:
+            formatted_value = f"{actual_value / 1_000_000:.2f}M"
+        player_sample_df['log_predict'] = predictions
+        player_sample_df['predicted_value_euros'] = formatted_value
+        player_sample_df.to_sql('prediction', con=engine, if_exists='append', index=False)
+        # Display the formatted predicted market value
+        st.markdown(f'<div style="color: green; font-size: 30px;">Predicted market value for the uploaded player data is: {formatted_value} €</div>', unsafe_allow_html=True)
+    # Fetch data from base and display it in a table
+    st.subheader("Predicted values stored in the database")
+    st.dataframe(load_data_from_base("prediction",engine))
