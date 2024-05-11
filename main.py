@@ -1,6 +1,16 @@
 import hmac
 import streamlit as st
-
+import streamlit as st
+import plotly.express as px
+import pandas as pd
+import plotly.graph_objects as go
+import numpy as np
+from sqlalchemy import create_engine
+from utils import load_data, calculate_player_attributes, calculate_mean_attributes,format_market_value\
+, generate_player_stats_comparison, generate_player_stats_comparison_graph, generate_player_attributes_comparison_graph
+import joblib
+from sklearn.ensemble import RandomForestRegressor
+import math
 def load_data_from_base(table,engine):
     return pd.read_sql(f"SELECT * FROM {table}", engine)
 engine = create_engine(
@@ -43,17 +53,7 @@ def check_password():
 if not check_password():
     st.stop()  # Do not continue if check_password is not True.
 
-import streamlit as st
-import plotly.express as px
-import pandas as pd
-import plotly.graph_objects as go
-import numpy as np
-from sqlalchemy import create_engine
-from utils import load_data, calculate_player_attributes, calculate_mean_attributes,format_market_value\
-, generate_player_stats_comparison, generate_player_stats_comparison_graph, generate_player_attributes_comparison_graph
-import joblib
-from sklearn.ensemble import RandomForestRegressor
-import math
+
 # Load data
 st.set_page_config(
     page_title="Player Market Price",
