@@ -5,14 +5,14 @@ import plotly.express as px
 import pandas as pd
 import plotly.graph_objects as go
 import numpy as np
+import sqlalchemy
 from sqlalchemy import create_engine
 from utils import load_data, calculate_player_attributes, calculate_mean_attributes,format_market_value\
 , generate_player_stats_comparison, generate_player_stats_comparison_graph, generate_player_attributes_comparison_graph
 import joblib
 from sklearn.ensemble import RandomForestRegressor
 import math
-def load_data_from_base(table,engine):
-    return pd.read_sql(f"SELECT * FROM {table}", engine)
+
 engine = create_engine(
     "mysql+mysqlconnector://{user}:{pw}@{host}:{port}/{db}".format(
         user=st.secrets["user"],
@@ -22,10 +22,18 @@ engine = create_engine(
         db=st.secrets["database"],
     )
 )
+st.cache(hash_funcs={sqlalchemy.engine.base.Engine: id})
+def load_data_from_base(table,engine):
+    return pd.read_sql(f"SELECT * FROM {table}", engine)
+
+
 df_player_web_stats = load_data_from_base("player_web_stats",engine)
 df_ref_joueurs = load_data_from_base("ref_joueurs",engine)
 df = df_player_web_stats.merge(df_ref_joueurs, left_on='name', right_on='Surnom')
 best_model = joblib.load('best_model.pkl')
+
+
+
 def check_password():
     """Returns `True` if the user had the correct password."""
 
