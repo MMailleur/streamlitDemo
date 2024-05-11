@@ -1,13 +1,27 @@
 import hmac
 import streamlit as st
 
-
+def load_data_from_base(table,engine):
+    return pd.read_sql(f"SELECT * FROM {table}", engine)
+engine = create_engine(
+    "mysql+mysqlconnector://{user}:{pw}@{host}:{port}/{db}".format(
+        user=st.secrets["user"],
+        pw=st.secrets["password"],
+        host=st.secrets["host"],
+        port=st.secrets["port"],
+        db=st.secrets["database"],
+    )
+)
+df_player_web_stats = load_data_from_base("player_web_stats",engine)
+df_ref_joueurs = load_data_from_base("ref_joueurs",engine)
+df = df_player_web_stats.merge(df_ref_joueurs, left_on='name', right_on='Surnom')
+best_model = joblib.load('best_model.pkl')
 def check_password():
     """Returns `True` if the user had the correct password."""
 
     def password_entered():
         """Checks whether a password entered by the user is correct."""
-        if hmac.compare_digest(st.session_state["password"], st.secrets["password_co"]):
+        if hmac.compare_digest(st.session_state["password"], st.secrets["password"]):
             st.session_state["password_correct"] = True
             del st.session_state["password"]  # Don't store the password.
         else:
@@ -46,21 +60,7 @@ st.set_page_config(
     page_icon=":soccer:",  # Change to your preferred icon
     layout="wide"
 )
-def load_data_from_base(table,engine):
-    return pd.read_sql(f"SELECT * FROM {table}", engine)
-engine = create_engine(
-    "mysql+mysqlconnector://{user}:{pw}@{host}:{port}/{db}".format(
-        user=st.secrets["user"],
-        pw=st.secrets["password"],
-        host=st.secrets["host"],
-        port=st.secrets["port"],
-        db=st.secrets["database"],
-    )
-)
-df_player_web_stats = load_data_from_base("player_web_stats",engine)
-df_ref_joueurs = load_data_from_base("ref_joueurs",engine)
-df = df_player_web_stats.merge(df_ref_joueurs, left_on='name', right_on='Surnom')
-best_model = joblib.load('best_model.pkl')
+
 # Set Streamlit page configuration
 
 
