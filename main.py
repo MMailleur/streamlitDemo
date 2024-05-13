@@ -22,18 +22,9 @@ engine = create_engine(
         db=st.secrets["database"],
     )
 )
-st.cache(hash_funcs={sqlalchemy.engine.base.Engine: id})
+@st.cache_data(hash_funcs={sqlalchemy.engine.base.Engine: id})
 def load_data_from_base(table,engine):
     return pd.read_sql(f"SELECT * FROM {table}", engine)
-
-
-df_player_web_stats = load_data_from_base("player_web_stats",engine)
-df_ref_joueurs = load_data_from_base("ref_joueurs",engine)
-df = df_player_web_stats.merge(df_ref_joueurs, left_on='name', right_on='Surnom')
-best_model = joblib.load('best_model.pkl')
-
-
-
 def check_password():
     """Returns `True` if the user had the correct password."""
 
@@ -56,11 +47,15 @@ def check_password():
     if "password_correct" in st.session_state:
         st.error("😕 Password incorrect")
     return False
-
+@st.cache_data
+def load_pickle():
+    return joblib.load('best_model.pkl')
+def merge_df():
+    return df_player_web_stats.merge(df_ref_joueurs, left_on='name', right_on='Surnom')
 
 if not check_password():
     st.stop()  # Do not continue if check_password is not True.
-
+# Main content based on selected tab
 
 # Load data
 st.set_page_config(
@@ -69,15 +64,13 @@ st.set_page_config(
     layout="wide"
 )
 
-# Set Streamlit page configuration
-
-
 #Sidebar with tabs
 selected_tab = st.sidebar.radio("Football Market analysis", ["Market Stats :chart:", "Player :athletic_shoe:","Player Market Value IA prediction 🤯"])
 
-
-
-# Main content based on selected tab
+best_model = load_pickle()
+df_player_web_stats = load_data_from_base("player_web_stats",engine)
+df_ref_joueurs = load_data_from_base("ref_joueurs",engine)
+df = merge_df()
 if selected_tab == "Market Stats :chart:":
     cola,colb = st.columns(2)
     # Create the scatter plot with player names as tooltips
