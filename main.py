@@ -13,6 +13,12 @@ import joblib
 from sklearn.ensemble import RandomForestRegressor
 import math
 
+st.set_page_config(
+    page_title="Player Market Price",
+    page_icon=":soccer:",  # Change to your preferred icon
+    layout="wide"
+)
+
 engine = create_engine(
     "mysql+mysqlconnector://{user}:{pw}@{host}:{port}/{db}".format(
         user=st.secrets["user"],
@@ -22,25 +28,19 @@ engine = create_engine(
         db=st.secrets["database"],
     )
 )
-@st.cache_data(hash_funcs={sqlalchemy.engine.base.Engine: id})
-def load_data_from_base(table,engine):
-    return pd.read_sql(f"SELECT * FROM {table}", engine)
-@st.cache_data
-def load_pickle():
-    return joblib.load('best_model.pkl')
-def merge_df():
-    return df_player_web_stats.merge(df_ref_joueurs, left_on='name', right_on='Surnom')
 
-# Load data
-st.set_page_config(
-    page_title="Player Market Price",
-    page_icon=":soccer:",  # Change to your preferred icon
-    layout="wide"
-)
 
 #Sidebar with tabs
 selected_tab = st.sidebar.radio("Football Market analysis", ["Market Stats :chart:", "Player :athletic_shoe:","Player Market Value IA prediction 🤯"])
 
+@st.cache_data
+def load_data_from_base(table,_engine):
+    return pd.read_sql(f"SELECT * FROM {table}", _engine)
+
+def load_pickle():
+    return joblib.load('best_model.pkl')
+def merge_df():
+    return df_player_web_stats.merge(df_ref_joueurs, left_on='name', right_on='Surnom')
 best_model = load_pickle()
 df_player_web_stats = load_data_from_base("player_web_stats",engine)
 df_ref_joueurs = load_data_from_base("ref_joueurs",engine)
